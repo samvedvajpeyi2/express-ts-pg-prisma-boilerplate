@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "target": "ES2023",
+        "baseUrl": "./",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "paths": {
+            "@/*": ["./src/*"]
+        },
+        "typeRoots": ["./node_modules/@types"],
+        "types": ["node"],
+        "strict": true,
+        "outDir": "./dist",
+        "skipLibCheck": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "removeComments": true,
+        "allowImportingTsExtensions": true,
+        "noEmit": true
+    },
+    "tsc-alias": {
+        "resolveFullPaths": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist", "__tests__", "coverage"]
+}

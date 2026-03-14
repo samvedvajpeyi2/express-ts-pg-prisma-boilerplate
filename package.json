@@ -1,0 +1,38 @@
+{
+    "name": "express-ts-pg-prisma-boilterplate",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./src/server.ts",
+    "scripts": {
+        "dev": "tsx watch ./src/server.ts",
+        "build": "tsc",
+        "start": "node dist/server.ts",
+        "seed": "tsx ./prisma/seed.ts"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/jsonwebtoken": "^9.0.10",
+        "@types/node": "^25.2.3",
+        "@types/pg": "^8.16.0",
+        "prisma": "^7.4.0",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@prisma/adapter-pg": "^7.4.0",
+        "@prisma/client": "^7.4.0",
+        "bcryptjs": "^3.0.3",
+        "cors": "^2.8.6",
+        "dotenv": "^17.3.1",
+        "express": "^5.2.1",
+        "jsonwebtoken": "^9.0.3",
+        "pg": "^8.18.0",
+        "zod": "^4.3.6"
+    },
+    "type": "module"
+}

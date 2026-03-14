@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ReviewStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum RoleName {
+  USER
+  ADMIN
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  password   String
+  firstname  String?
+  lastname   String?
+  documents  Document[]
+  roleId     Int        @default(1)
+  role       Role       @relation(fields: [roleId], references: [id])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  active     Boolean    @default(true)
+}
+
+model Role {
+  id    Int     @id @default(autoincrement())
+  name  RoleName @unique
+  users User[]
+}
+
+model Document {
+  id           Int          @id @default(autoincrement())
+  filename     String
+  url          String?
+  mimeType     String?
+  uploadedAt   DateTime     @default(now())
+  reviewed     Boolean      @default(false)
+  reviewStatus ReviewStatus @default(PENDING)
+  reviewNotes  String?
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
