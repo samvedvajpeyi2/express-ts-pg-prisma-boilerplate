@@ -13,7 +13,7 @@ export class AuthRepository {
                 password: true,
                 firstname: true,
                 lastname: true,
-                roleId: true,
+                role: { select: { name: true } },
             },
         });
     }
@@ -44,6 +44,40 @@ export class AuthRepository {
                 role: { select: { name: true } },
                 createdAt: true,
             },
+        });
+    }
+
+    async createRefreshToken(data: {
+        userId: number;
+        tokenHash: string;
+        expiresAt: Date;
+    }) {
+        return this.prisma.refreshToken.create({
+            data: {
+                userId: data.userId,
+                tokenHash: data.tokenHash,
+                expiresAt: data.expiresAt,
+            },
+        });
+    }
+
+    async findRefreshToken(tokenHash: string) {
+        return this.prisma.refreshToken.findUnique({
+            where: { tokenHash },
+        });
+    }
+
+    async revokeRefreshToken(tokenHash: string) {
+        return this.prisma.refreshToken.update({
+            where: { tokenHash },
+            data: { revokedAt: new Date() },
+        });
+    }
+
+    async revokeAllUserRefreshTokens(userId: number) {
+        return this.prisma.refreshToken.updateMany({
+            where: { userId, revokedAt: null },
+            data: { revokedAt: new Date() },
         });
     }
 }

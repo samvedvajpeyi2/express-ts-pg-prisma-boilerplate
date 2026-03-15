@@ -20,4 +20,8 @@ router.post(
 
 router.post("/login", validateRequest(loginSchema), authController.login);
 
+router.post("/refresh", authController.refresh);
+
+router.post("/logout", authController.logout);
+
 export default router;

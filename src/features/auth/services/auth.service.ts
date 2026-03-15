@@ -1,9 +1,34 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { AuthRepository } from "../repositories/auth.repository.ts";
 import type { LoginInput, RegisterInput } from "../schemas/auth.schema.ts";
+import { env } from "../../../config/env-config.ts";
+import {
+    signRefreshToken,
+    signToken,
+    verifyRefreshToken,
+} from "../../../utils/jwt.util.ts";
+import { parseDurationMs } from "../../../utils/time.util.ts";
+import type { RoleName } from "../../../../generated/prisma/client.js";
 
 export class AuthService {
     constructor(private readonly repo: AuthRepository) {}
+
+    private async buildRefreshToken(
+        userId: number,
+        role: RoleName,
+    ): Promise<string> {
+        const rawToken = signRefreshToken({ userId, role });
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(rawToken)
+            .digest("hex");
+        const expiresAt = new Date(
+            Date.now() + parseDurationMs(env.REFRESH_TOKEN_EXPIRES_IN),
+        );
+        await this.repo.createRefreshToken({ userId, tokenHash, expiresAt });
+        return rawToken;
+    }
 
     async register(input: RegisterInput) {
         const email = input.email.trim().toLowerCase();
@@ -25,10 +50,20 @@ export class AuthService {
             lastname: input.lastname?.trim(),
         });
 
+        const accessToken = signToken({
+            userId: user.id,
+            role: user.role.name,
+        });
+        const refreshToken = await this.buildRefreshToken(
+            user.id,
+            user.role.name,
+        );
+
         return {
             success: true,
             message: "Registration successful",
-            data: user,
+            data: { ...user, accessToken },
+            refreshToken,
         };
     }
 
@@ -45,11 +80,70 @@ export class AuthService {
             user.password,
         );
         if (!passwordMatch) {
+            // To prevent user enumeration, return the same message for both cases
             return { success: false, message: "Invalid credentials" };
         }
 
-        // Exclude password from returned user data
+        // Exclude password from the returned user data
         const { password: _, ...safeUser } = user;
-        return { success: true, message: "Login successful", data: safeUser };
+        const accessToken = signToken({
+            userId: user.id,
+            role: user.role.name,
+        });
+        const refreshToken = await this.buildRefreshToken(
+            user.id,
+            user.role.name,
+        );
+
+        return {
+            success: true,
+            message: "Login successful",
+            data: { ...safeUser, accessToken },
+            refreshToken,
+        };
+    }
+
+    async refresh(rawToken: string) {
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(rawToken)
+            .digest("hex");
+        const stored = await this.repo.findRefreshToken(tokenHash);
+
+        if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
+            return {
+                success: false,
+                message: "Invalid or expired refresh token",
+            };
+        }
+
+        // Verify JWT signature
+        const payload = verifyRefreshToken(rawToken);
+
+        // Rotate: revoke old token, issue new one
+        await this.repo.revokeRefreshToken(tokenHash);
+        const newAccessToken = signToken({
+            userId: payload.userId,
+            role: payload.role,
+        });
+        const newRefreshToken = await this.buildRefreshToken(
+            payload.userId,
+            payload.role,
+        );
+
+        return {
+            success: true,
+            data: { accessToken: newAccessToken },
+            refreshToken: newRefreshToken,
+        };
+    }
+
+    async logout(rawToken: string) {
+        const tokenHash = crypto
+            .createHash("sha256")
+            .update(rawToken)
+            .digest("hex");
+        await this.repo.revokeRefreshToken(tokenHash);
+        return { success: true, message: "Logged out successfully" };
     }
 }

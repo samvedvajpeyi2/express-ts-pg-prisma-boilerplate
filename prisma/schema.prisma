@@ -32,6 +32,7 @@ model User {
   firstname  String?
   lastname   String?
   documents  Document[]
+  refreshTokens RefreshToken[]
   roleId     Int        @default(1)
   role       Role       @relation(fields: [roleId], references: [id])
   createdAt  DateTime   @default(now())
@@ -58,4 +59,17 @@ model Document {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model RefreshToken {
+  id         Int      @id @default(autoincrement())
+  tokenHash  String   @unique
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
