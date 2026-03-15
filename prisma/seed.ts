@@ -1,29 +1,25 @@
 import { prisma } from "../src/config/prisma.ts";
 import bcrypt from "bcryptjs";
+import { ROLE_NAMES } from "../src/constants/roles.ts";
 
 // Roles
-const roles = [
-    { id: 1, name: "ADMIN" },
-    { id: 2, name: "USER" },
-];
+const roles = [{ name: ROLE_NAMES.ADMIN }, { name: ROLE_NAMES.USER }];
 
 // Users
 const users = [
     {
-        id: 1,
         email: "admin@example.com",
         password: bcrypt.hashSync("password", 10),
         firstname: "Admin",
         lastname: "User",
-        roleId: 1,
+        roleName: ROLE_NAMES.ADMIN,
     },
     {
-        id: 2,
         email: "user@example.com",
         password: bcrypt.hashSync("password", 10),
         firstname: "Regular",
         lastname: "User",
-        roleId: 2,
+        roleName: ROLE_NAMES.USER,
     },
 ];
 
@@ -41,7 +37,17 @@ const main = async () => {
 
     for (const userData of users) {
         await prisma.user.create({
-            data: userData,
+            data: {
+                email: userData.email,
+                password: userData.password,
+                firstname: userData.firstname,
+                lastname: userData.lastname,
+                role: {
+                    connect: {
+                        name: userData.roleName,
+                    },
+                },
+            },
         });
         console.log(`Created user: ${userData.email}`);
     }

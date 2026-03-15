@@ -10,7 +10,7 @@
         "seed": "tsx ./prisma/seed.ts"
     },
     "keywords": [],
-    "author": "",
+    "author": "Samved Vajpeyi",
     "license": "ISC",
     "devDependencies": {
         "@types/bcryptjs": "^2.4.6",

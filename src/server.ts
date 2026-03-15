@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from "express";
 // import type { Request, Response, NextFunction } from "express";
 import { env } from "./config/env-config.ts";
+import authRoutes from "./features/auth/routes/auth.routes.ts";
 import userRoutes from "./features/user/routes/user.routes.ts";
 
 const app: Application = express();
@@ -20,6 +21,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
