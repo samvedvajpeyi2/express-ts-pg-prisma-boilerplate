@@ -3,9 +3,22 @@ import express, { Application, Request, Response, NextFunction } from "express";
 import { env } from "./config/env-config.ts";
 import authRoutes from "./features/auth/routes/auth.routes.ts";
 import userRoutes from "./features/user/routes/user.routes.ts";
+import { errorMiddleware } from "./middleware/error.middleware.ts";
+import {
+    checkJsonContentTypeMiddleware,
+    unmatchedRoutesMiddleware,
+} from "./middleware/request-guard.middleware.ts";
+import {
+    hostWhitelistMiddleware,
+    rateLimiterMiddleware,
+} from "./middleware/security.middleware.ts";
 
 const app: Application = express();
 const PORT: number = env.PORT;
+
+app.use(rateLimiterMiddleware);
+app.use(hostWhitelistMiddleware(env.WHITE_LIST_URLS));
+app.use(checkJsonContentTypeMiddleware);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -22,6 +35,10 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 app.use("/users", userRoutes);
 app.use("/auth", authRoutes);
+
+app.use(unmatchedRoutesMiddleware);
+
+// app.use(errorMiddleware);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../../../config/prisma.ts";
-import { validateRequest } from "../../../middleware/validation.middleware.ts";
+import { validateRequestMiddleware } from "../../../middleware/validation.middleware.ts";
 import { AuthController } from "../controllers/auth.controller.ts";
 import { AuthRepository } from "../repositories/auth.repository.ts";
 import { loginSchema, registerSchema } from "../schemas/auth.schema.ts";
@@ -14,11 +14,15 @@ const router = Router();
 
 router.post(
     "/register",
-    validateRequest(registerSchema),
+    validateRequestMiddleware(registerSchema),
     authController.register,
 );
 
-router.post("/login", validateRequest(loginSchema), authController.login);
+router.post(
+    "/login",
+    validateRequestMiddleware(loginSchema),
+    authController.login,
+);
 
 router.post("/refresh", authController.refresh);
 

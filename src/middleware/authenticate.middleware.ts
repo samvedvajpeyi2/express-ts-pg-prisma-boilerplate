@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt.util.ts";
 
-export const authenticate = (
+export const authenticateMiddleware = (
     req: Request,
     res: Response,
     next: NextFunction,

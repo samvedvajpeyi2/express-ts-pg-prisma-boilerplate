@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 import { AuthService } from "../services/auth.service.ts";
 import { env } from "../../../config/env-config.ts";
 import { parseDurationMs } from "../../../utils/time.util.ts";
@@ -39,81 +39,66 @@ const getRefreshTokenFromRequest = (req: Request): string | undefined => {
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    register = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const result = await this.authService.register(req.body);
+    register = async (req: Request, res: Response) => {
+        const result = await this.authService.register(req.body);
 
-            if (!result.success) {
-                res.status(409).json(result);
-                return;
-            }
-
-            setRefreshTokenCookie(res, result.refreshToken!);
-            const { refreshToken: _, ...responseBody } = result;
-            res.status(201).json(responseBody);
-        } catch (error) {
-            next(error);
+        if (!result.success) {
+            res.status(409).json(result);
+            return;
         }
+
+        setRefreshTokenCookie(res, result.refreshToken!);
+        const { refreshToken: _, ...responseBody } = result;
+        res.status(201).json(responseBody);
     };
 
-    login = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const result = await this.authService.login(req.body);
-            if (!result.success) {
-                res.status(401).json(result);
-                return;
-            }
-            setRefreshTokenCookie(res, result.refreshToken!);
-            const { refreshToken: _, ...responseBody } = result;
-            res.status(200).json(responseBody);
-        } catch (error) {
-            next(error);
+    login = async (req: Request, res: Response) => {
+        const result = await this.authService.login(req.body);
+        if (!result.success) {
+            res.status(401).json(result);
+            return;
         }
+
+        setRefreshTokenCookie(res, result.refreshToken!);
+        const { refreshToken: _, ...responseBody } = result;
+        res.status(200).json(responseBody);
     };
 
-    refresh = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const refreshToken = getRefreshTokenFromRequest(req);
-            if (!refreshToken) {
-                res.status(401).json({
-                    success: false,
-                    message: "Refresh token not found",
-                });
-                return;
-            }
-
-            const result = await this.authService.refresh(refreshToken);
-            if (!result.success) {
-                clearRefreshTokenCookie(res);
-                res.status(401).json(result);
-                return;
-            }
-
-            setRefreshTokenCookie(res, result.refreshToken!);
-            const { refreshToken: _, ...responseBody } = result;
-            res.status(200).json(responseBody);
-        } catch (error) {
-            next(error);
+    refresh = async (req: Request, res: Response) => {
+        const refreshToken = getRefreshTokenFromRequest(req);
+        if (!refreshToken) {
+            res.status(401).json({
+                success: false,
+                message: "Refresh token not found",
+            });
+            return;
         }
-    };
 
-    logout = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const refreshToken = getRefreshTokenFromRequest(req);
+        const result = await this.authService.refresh(refreshToken);
+        if (!result.success) {
             clearRefreshTokenCookie(res);
-
-            if (!refreshToken) {
-                res.status(200).json({
-                    success: true,
-                    message: "Logged out successfully",
-                });
-                return;
-            }
-
-            const result = await this.authService.logout(refreshToken);
-            res.status(200).json(result);
-        } catch (error) {
-            next(error);
+            res.status(401).json(result);
+            return;
         }
+
+        setRefreshTokenCookie(res, result.refreshToken!);
+        const { refreshToken: _, ...responseBody } = result;
+        res.status(200).json(responseBody);
+    };
+
+    logout = async (req: Request, res: Response) => {
+        const refreshToken = getRefreshTokenFromRequest(req);
+        clearRefreshTokenCookie(res);
+
+        if (!refreshToken) {
+            res.status(200).json({
+                success: true,
+                message: "Logged out successfully",
+            });
+            return;
+        }
+
+        const result = await this.authService.logout(refreshToken);
+        res.status(200).json(result);
     };
 }
