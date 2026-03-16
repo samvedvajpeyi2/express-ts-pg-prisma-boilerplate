@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import fs from "fs";
 
-import type { EnvVars } from "./env-schema.ts";
-import { envSchema } from "./env-schema.ts";
+import type { EnvVars } from "./env-schema.js";
+import { envSchema } from "./env-schema.js";
 
 // Determine which .env file to load based on NODE_ENV
 const nodeEnv = process.env.NODE_ENV || "development";

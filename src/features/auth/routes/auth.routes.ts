@@ -1,11 +1,11 @@
 import { Router } from "express";
 
-import { prisma } from "../../../config/prisma.ts";
-import { validateRequestMiddleware } from "../../../middleware/validation.middleware.ts";
-import { AuthController } from "../controllers/auth.controller.ts";
-import { AuthRepository } from "../repositories/auth.repository.ts";
-import { loginSchema, registerSchema } from "../schemas/auth.schema.ts";
-import { AuthService } from "../services/auth.service.ts";
+import { prisma } from "../../../config/prisma.js";
+import { validateRequestMiddleware } from "../../../middleware/validation.middleware.js";
+import { AuthController } from "../controllers/auth.controller.js";
+import { AuthRepository } from "../repositories/auth.repository.js";
+import { loginSchema, registerSchema } from "../schemas/auth.schema.js";
+import { AuthService } from "../services/auth.service.js";
 
 const authRepository = new AuthRepository(prisma);
 const authService = new AuthService(authRepository);

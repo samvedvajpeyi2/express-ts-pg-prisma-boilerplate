@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 
 import { Prisma } from "../../generated/prisma/client.js";
-import { AppError } from "../errors/app-error.ts";
+import { AppError } from "../errors/app-error.js";
 
 export const errorMiddleware = (
     err: Error,

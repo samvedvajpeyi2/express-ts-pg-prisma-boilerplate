@@ -1,5 +1,5 @@
 import type { PrismaClient } from "../../../../generated/prisma/client.js";
-import { DEFAULT_ROLE_NAME } from "../../../constants/roles.ts";
+import { DEFAULT_ROLE_NAME } from "../../../constants/roles.js";
 
 export class AuthRepository {
     constructor(private readonly prisma: PrismaClient) {}

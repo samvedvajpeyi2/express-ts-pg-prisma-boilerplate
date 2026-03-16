@@ -1,19 +1,22 @@
+import type { Server } from "node:http";
+
 import type { Application, NextFunction, Request, Response } from "express";
 import express from "express";
 
 // import type { Request, Response, NextFunction } from "express";
-import { env } from "./config/env-config.ts";
-import authRoutes from "./features/auth/routes/auth.routes.ts";
-import userRoutes from "./features/user/routes/user.routes.ts";
-import { errorMiddleware } from "./middleware/error.middleware.ts";
+import { env } from "./config/env-config.js";
+import { prisma } from "./config/prisma.js";
+import authRoutes from "./features/auth/routes/auth.routes.js";
+import userRoutes from "./features/user/routes/user.routes.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 import {
     checkJsonContentTypeMiddleware,
     unmatchedRoutesMiddleware,
-} from "./middleware/request-guard.middleware.ts";
+} from "./middleware/request-guard.middleware.js";
 import {
     hostWhitelistMiddleware,
     rateLimiterMiddleware,
-} from "./middleware/security.middleware.ts";
+} from "./middleware/security.middleware.js";
 
 const app: Application = express();
 const PORT: number = env.PORT;
@@ -42,6 +45,42 @@ app.use(unmatchedRoutesMiddleware);
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
+const server: Server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+});
+
+let isShuttingDown = false;
+
+const gracefulShutdown = (signal: string): void => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
+    console.log(`[Shutdown] Received ${signal}. Closing server...`);
+
+    server.close((error?: Error) => {
+        if (error) {
+            console.error("[Shutdown] Error while closing HTTP server:", error);
+            process.exit(1);
+            return;
+        }
+
+        void prisma
+            .$disconnect()
+            .then(() => {
+                console.log("[Shutdown] Prisma disconnected. Exiting.");
+                process.exit(0);
+            })
+            .catch((disconnectError) => {
+                console.error("[Shutdown] Prisma disconnect failed:", disconnectError);
+                process.exit(1);
+            });
+    });
+};
+
+process.on("SIGINT", () => {
+    gracefulShutdown("SIGINT");
+});
+
+process.on("SIGTERM", () => {
+    gracefulShutdown("SIGTERM");
 });

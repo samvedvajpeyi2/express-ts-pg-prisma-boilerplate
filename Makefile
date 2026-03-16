@@ -1,7 +1,7 @@
 .PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed
 
 start:
-	docker compose up --build -d
+	docker compose up -d
 
 stop:
 	docker compose down
@@ -10,11 +10,11 @@ remove:
 	docker compose down -v
 
 build:
-	docker compose build --no-cache
+	docker compose up --build -d
 
 restart:
 	docker compose down
-	docker compose up --build -d
+	docker compose up -d
 
 reset:
 	docker compose down -v

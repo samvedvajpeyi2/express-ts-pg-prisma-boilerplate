@@ -2,11 +2,11 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 import type { RoleName } from "../../../../generated/prisma/client.js";
-import { env } from "../../../config/env-config.ts";
-import { signRefreshToken, signToken, verifyRefreshToken } from "../../../utils/jwt.util.ts";
-import { parseDurationMs } from "../../../utils/time.util.ts";
-import type { AuthRepository } from "../repositories/auth.repository.ts";
-import type { LoginInput, RegisterInput } from "../schemas/auth.schema.ts";
+import { env } from "../../../config/env-config.js";
+import { signRefreshToken, signToken, verifyRefreshToken } from "../../../utils/jwt.util.js";
+import { parseDurationMs } from "../../../utils/time.util.js";
+import type { AuthRepository } from "../repositories/auth.repository.js";
+import type { LoginInput, RegisterInput } from "../schemas/auth.schema.js";
 
 export class AuthService {
     constructor(private readonly repo: AuthRepository) {}

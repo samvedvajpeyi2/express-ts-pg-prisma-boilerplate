@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 
-import { env } from "../../../config/env-config.ts";
-import { parseDurationMs } from "../../../utils/time.util.ts";
-import type { LoginInput, RegisterInput } from "../schemas/auth.schema.ts";
-import type { AuthService } from "../services/auth.service.ts";
+import { env } from "../../../config/env-config.js";
+import { parseDurationMs } from "../../../utils/time.util.js";
+import type { LoginInput, RegisterInput } from "../schemas/auth.schema.js";
+import type { AuthService } from "../services/auth.service.js";
 
 const REFRESH_TOKEN_COOKIE = "refreshToken";
 

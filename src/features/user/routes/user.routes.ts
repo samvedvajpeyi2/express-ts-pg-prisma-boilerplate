@@ -1,9 +1,9 @@
 import express from "express";
 
-import { ROLE_NAMES } from "../../../constants/roles.ts";
-import { authenticateMiddleware } from "../../../middleware/authenticate.middleware.ts";
-import { authorizeMiddleware } from "../../../middleware/authorize.middleware.ts";
-import { getUsers } from "../controllers/user.controller.ts";
+import { ROLE_NAMES } from "../../../constants/roles.js";
+import { authenticateMiddleware } from "../../../middleware/authenticate.middleware.js";
+import { authorizeMiddleware } from "../../../middleware/authorize.middleware.js";
+import { getUsers } from "../controllers/user.controller.js";
 
 const router = express.Router();
 
