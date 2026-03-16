@@ -11,7 +11,8 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
-        "format:check": "prettier --check ."
+        "format:check": "prettier --check .",
+        "prepare": "husky"
     },
     "keywords": [],
     "author": "Samved Vajpeyi",
@@ -33,6 +34,8 @@
         "eslint-plugin-security": "^4.0.0",
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "globals": "^17.4.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.4.0",
         "prettier": "^3.8.1",
         "prisma": "^7.4.0",
         "tsx": "^4.21.0",
@@ -51,5 +54,11 @@
         "pg": "^8.18.0",
         "zod": "^4.3.6"
     },
-    "type": "module"
+    "type": "module",
+    "lint-staged": {
+        "**/*.ts": [
+            "eslint --fix",
+            "prettier --write"
+        ]
+    }
 }
