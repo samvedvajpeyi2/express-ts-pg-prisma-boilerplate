@@ -41,12 +41,6 @@ const getRefreshTokenFromRequest = (req: Request): string | undefined => {
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    // making a deliberate mistake here just to test husky and lint-staged pre-commit hooks.
-    // This should be caught by the linter and prevent the commit.
-    // giving it another try.
-    unUsedVariable =
-        "This variable is declared but never used, which should trigger a linting error";
-
     register = async (req: Request, res: Response) => {
         const result = await this.authService.register(req.body as RegisterInput);
 
