@@ -1,11 +1,8 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
+
 import { verifyToken } from "../utils/jwt.util.ts";
 
-export const authenticateMiddleware = (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-): void => {
+export const authenticateMiddleware = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith("Bearer ")) {

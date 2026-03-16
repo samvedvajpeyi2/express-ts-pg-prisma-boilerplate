@@ -1,7 +1,9 @@
 import type { Request, Response } from "express";
-import { AuthService } from "../services/auth.service.ts";
+
 import { env } from "../../../config/env-config.ts";
 import { parseDurationMs } from "../../../utils/time.util.ts";
+import type { LoginInput, RegisterInput } from "../schemas/auth.schema.ts";
+import type { AuthService } from "../services/auth.service.ts";
 
 const REFRESH_TOKEN_COOKIE = "refreshToken";
 
@@ -40,7 +42,7 @@ export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     register = async (req: Request, res: Response) => {
-        const result = await this.authService.register(req.body);
+        const result = await this.authService.register(req.body as RegisterInput);
 
         if (!result.success) {
             res.status(409).json(result);
@@ -53,7 +55,7 @@ export class AuthController {
     };
 
     login = async (req: Request, res: Response) => {
-        const result = await this.authService.login(req.body);
+        const result = await this.authService.login(req.body as LoginInput);
         if (!result.success) {
             res.status(401).json(result);
             return;

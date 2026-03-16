@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+
 import type { RoleName } from "../../generated/prisma/client.js";
 
 export const authorizeMiddleware = (...allowedRoles: RoleName[]) => {

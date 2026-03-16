@@ -1,35 +1,27 @@
-import fs from "fs";
 import dotenv from "dotenv";
-import { envSchema, EnvVars } from "./env-schema.ts";
+import fs from "fs";
+
+import type { EnvVars } from "./env-schema.ts";
+import { envSchema } from "./env-schema.ts";
 
 // Determine which .env file to load based on NODE_ENV
 const nodeEnv = process.env.NODE_ENV || "development";
-// eslint-disable-next-line node/no-process-env
 const envFile = nodeEnv === "production" ? ".env" : ".env.dev";
 
 if (fs.existsSync(envFile)) {
     dotenv.config({ path: envFile });
-    // eslint-disable-next-line node/no-process-env
-    console.log(
-        `✅ Loaded environment: ${envFile}\nNODE_ENV: ${process.env.NODE_ENV}`,
-    );
+    console.log(`✅ Loaded environment: ${envFile}\nNODE_ENV: ${process.env.NODE_ENV}`);
 } else {
-    console.warn(
-        `⚠️ Warning: Environment file "${envFile}" not found. Using defaults.`,
-    );
+    console.warn(`⚠️ Warning: Environment file "${envFile}" not found. Using defaults.`);
 }
 
 // Validate env with schema
-// eslint-disable-next-line node/no-process-env
 const parsedEnv = envSchema.safeParse(process.env);
-// eslint-disable-next-line node/no-process-env
 const NODE_ENV = process.env.NODE_ENV || "development";
 
 if (!parsedEnv.success) {
     const formattedErrors = parsedEnv.error.format();
-    const missingKeys = Object.keys(formattedErrors).filter(
-        (key) => key !== "_errors",
-    );
+    const missingKeys = Object.keys(formattedErrors).filter((key) => key !== "_errors");
     console.error(
         `❌ Missing environment variables in "${NODE_ENV}" .env file:\n${missingKeys.join(", ")}`,
     );
@@ -73,7 +65,5 @@ const extraKeys = definedEnvKeys.filter(
 );
 
 if (extraKeys.length > 0) {
-    console.warn(
-        `⚠️ Warning: Undeclared environment variables detected: ${extraKeys.join(", ")}`,
-    );
+    console.warn(`⚠️ Warning: Undeclared environment variables detected: ${extraKeys.join(", ")}`);
 }

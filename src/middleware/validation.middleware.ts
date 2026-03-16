@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { z } from "zod";
+import type { NextFunction, Request, Response } from "express";
+import type { z } from "zod";
 
 export const validateRequestMiddleware = (schema: z.ZodType<unknown>) => {
     return (req: Request, res: Response, next: NextFunction): void => {

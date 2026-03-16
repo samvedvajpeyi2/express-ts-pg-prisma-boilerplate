@@ -1,4 +1,6 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import type { Application, NextFunction, Request, Response } from "express";
+import express from "express";
+
 // import type { Request, Response, NextFunction } from "express";
 import { env } from "./config/env-config.ts";
 import authRoutes from "./features/auth/routes/auth.routes.ts";
@@ -29,7 +31,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
+app.get("/", (req: Request, res: Response) => {
     res.send("Hello, world! This is the server.js file, or is it?");
 });
 
@@ -38,7 +40,7 @@ app.use("/auth", authRoutes);
 
 app.use(unmatchedRoutesMiddleware);
 
-// app.use(errorMiddleware);
+app.use(errorMiddleware);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

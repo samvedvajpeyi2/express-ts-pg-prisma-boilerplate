@@ -1,13 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
-import { Prisma } from "../../generated/prisma/client.js";
 import { ZodError } from "zod";
+
+import { Prisma } from "../../generated/prisma/client.js";
 import { AppError } from "../errors/app-error.ts";
 
 export const errorMiddleware = (
     err: Error,
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
 ): void => {
     if (err instanceof AppError) {
         res.status(err.statusCode).json({

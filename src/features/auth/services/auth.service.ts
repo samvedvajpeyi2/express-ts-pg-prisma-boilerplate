@@ -1,31 +1,20 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { AuthRepository } from "../repositories/auth.repository.ts";
-import type { LoginInput, RegisterInput } from "../schemas/auth.schema.ts";
-import { env } from "../../../config/env-config.ts";
-import {
-    signRefreshToken,
-    signToken,
-    verifyRefreshToken,
-} from "../../../utils/jwt.util.ts";
-import { parseDurationMs } from "../../../utils/time.util.ts";
+
 import type { RoleName } from "../../../../generated/prisma/client.js";
+import { env } from "../../../config/env-config.ts";
+import { signRefreshToken, signToken, verifyRefreshToken } from "../../../utils/jwt.util.ts";
+import { parseDurationMs } from "../../../utils/time.util.ts";
+import type { AuthRepository } from "../repositories/auth.repository.ts";
+import type { LoginInput, RegisterInput } from "../schemas/auth.schema.ts";
 
 export class AuthService {
     constructor(private readonly repo: AuthRepository) {}
 
-    private async buildRefreshToken(
-        userId: number,
-        role: RoleName,
-    ): Promise<string> {
+    private async buildRefreshToken(userId: number, role: RoleName): Promise<string> {
         const rawToken = signRefreshToken({ userId, role });
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(rawToken)
-            .digest("hex");
-        const expiresAt = new Date(
-            Date.now() + parseDurationMs(env.REFRESH_TOKEN_EXPIRES_IN),
-        );
+        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+        const expiresAt = new Date(Date.now() + parseDurationMs(env.REFRESH_TOKEN_EXPIRES_IN));
         await this.repo.createRefreshToken({ userId, tokenHash, expiresAt });
         return rawToken;
     }
@@ -54,10 +43,7 @@ export class AuthService {
             userId: user.id,
             role: user.role.name,
         });
-        const refreshToken = await this.buildRefreshToken(
-            user.id,
-            user.role.name,
-        );
+        const refreshToken = await this.buildRefreshToken(user.id, user.role.name);
 
         return {
             success: true,
@@ -75,10 +61,7 @@ export class AuthService {
             return { success: false, message: "Invalid credentials" };
         }
 
-        const passwordMatch = await bcrypt.compare(
-            input.password,
-            user.password,
-        );
+        const passwordMatch = await bcrypt.compare(input.password, user.password);
         if (!passwordMatch) {
             // To prevent user enumeration, return the same message for both cases
             return { success: false, message: "Invalid credentials" };
@@ -90,10 +73,7 @@ export class AuthService {
             userId: user.id,
             role: user.role.name,
         });
-        const refreshToken = await this.buildRefreshToken(
-            user.id,
-            user.role.name,
-        );
+        const refreshToken = await this.buildRefreshToken(user.id, user.role.name);
 
         return {
             success: true,
@@ -104,10 +84,7 @@ export class AuthService {
     }
 
     async refresh(rawToken: string) {
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(rawToken)
-            .digest("hex");
+        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
         const stored = await this.repo.findRefreshToken(tokenHash);
 
         if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
@@ -126,10 +103,7 @@ export class AuthService {
             userId: payload.userId,
             role: payload.role,
         });
-        const newRefreshToken = await this.buildRefreshToken(
-            payload.userId,
-            payload.role,
-        );
+        const newRefreshToken = await this.buildRefreshToken(payload.userId, payload.role);
 
         return {
             success: true,
@@ -139,10 +113,7 @@ export class AuthService {
     }
 
     async logout(rawToken: string) {
-        const tokenHash = crypto
-            .createHash("sha256")
-            .update(rawToken)
-            .digest("hex");
+        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
         await this.repo.revokeRefreshToken(tokenHash);
         return { success: true, message: "Logged out successfully" };
     }

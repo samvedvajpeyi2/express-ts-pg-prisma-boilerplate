@@ -1,5 +1,6 @@
+import type { Request, Response } from "express";
+
 import { prisma } from "../../../config/prisma.ts";
-import { Request, Response } from "express";
 
 const getUsers = async (req: Request, res: Response) => {
     // throw a test error to verify that our global error handler works
