@@ -12,6 +12,9 @@
         "lint:fix": "eslint . --fix",
         "format": "prettier --write .",
         "format:check": "prettier --check .",
+        "test": "vitest",
+        "test:watch": "vitest --watch",
+        "test:coverage": "vitest run --coverage",
         "prepare": "husky"
     },
     "keywords": [],
@@ -25,6 +28,8 @@
         "@types/jsonwebtoken": "^9.0.10",
         "@types/node": "^25.2.3",
         "@types/pg": "^8.16.0",
+        "@types/supertest": "^7.2.0",
+        "@vitest/coverage-v8": "^4.1.0",
         "eslint": "^9.39.4",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
@@ -38,9 +43,11 @@
         "lint-staged": "^16.4.0",
         "prettier": "^3.8.1",
         "prisma": "^7.4.0",
+        "supertest": "^7.2.2",
         "tsx": "^4.21.0",
         "typescript": "^5.9.3",
-        "typescript-eslint": "^8.57.0"
+        "typescript-eslint": "^8.57.0",
+        "vitest": "^4.1.0"
     },
     "dependencies": {
         "@prisma/adapter-pg": "^7.4.0",

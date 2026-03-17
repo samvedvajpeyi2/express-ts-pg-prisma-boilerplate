@@ -1,7 +1,7 @@
-.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed
+.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b
 
 start:
-	docker compose up -d
+	docker compose up
 
 stop:
 	docker compose down
@@ -43,3 +43,12 @@ seed:
 
 pri-seed:
 	docker exec -it pen_ts_boilerplate_app npx prisma db seed
+
+d:
+	docker compose down
+
+u:
+	docker compose up -d
+
+b:
+	docker compose up --build -d
