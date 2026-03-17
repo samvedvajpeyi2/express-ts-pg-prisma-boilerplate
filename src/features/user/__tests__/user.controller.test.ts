@@ -33,7 +33,7 @@ describe("getUsers controller", () => {
         // Cast `prisma` to a narrow typed shape to avoid `any` and unsafe-member-access lint errors.
         type UserPrisma = { user: { findMany: Mock } };
         const prismaTyped = prisma as unknown as UserPrisma;
-        prismaTyped.user.findMany = vi.fn().mockResolvedValue(mockUsers);
+        prismaTyped.user.findMany.mockResolvedValue(mockUsers);
 
         // Use typed Request/Response to minimize `any` usage in tests.
         const req = {} as unknown as Request;
