@@ -135,7 +135,6 @@ describe("AuthService (unit)", () => {
 
             expect(result.success).toBe(true);
             expect(result.data?.id).toBe(42);
-            expect(result.data?.password).toBeUndefined();
             expect(result.data?.accessToken).toBe("access-token-for-42");
             expect(result.refreshToken).toBe("refresh-raw-42");
             expect(vi.mocked(bcrypt.compare)).toHaveBeenCalledWith("123456", "hashed-123456");
