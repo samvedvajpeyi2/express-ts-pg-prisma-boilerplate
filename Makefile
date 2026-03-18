@@ -1,4 +1,4 @@
-.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b
+.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix
 
 start:
 	docker compose up
@@ -52,3 +52,15 @@ u:
 
 b:
 	docker compose up --build -d
+
+prune:
+	docker system prune -f
+
+test:
+	docker exec -it pen_ts_boilerplate_app npm run test
+
+lint:
+	docker exec -it pen_ts_boilerplate_app npm run lint
+
+lint-fix:
+	docker exec -it pen_ts_boilerplate_app npm run lint:fix

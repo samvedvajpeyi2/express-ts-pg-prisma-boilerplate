@@ -8,17 +8,16 @@ export default defineConfig({
         passWithNoTests: false,
         setupFiles: ["tests/setup.ts"],
         watch: false,
-    },
-    coverage: {
-        provider: "v8",
-        reporter: ["text", "lcov"],
-        all: true,
-        exclude: [
-            "**/generated/**",
-            "**/dist/**",
-            "**/node_modules/**",
-            "**/__tests__/**",
-            "**/tests/**",
-        ],
+        coverage: {
+            provider: "v8",
+            reporter: ["text", "lcov"],
+            exclude: [
+                "**/generated/**",
+                "**/dist/**",
+                "**/node_modules/**",
+                "**/__tests__/**",
+                "**/tests/**",
+            ],
+        },
     },
 });

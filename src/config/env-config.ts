@@ -65,5 +65,5 @@ const extraKeys = definedEnvKeys.filter(
 );
 
 if (extraKeys.length > 0) {
-    console.warn(`⚠️ Warning: Undeclared environment variables detected: ${extraKeys.join(", ")}`);
+    // console.warn(`⚠️ Warning: Undeclared environment variables detected: ${extraKeys.join(", ")}`);
 }

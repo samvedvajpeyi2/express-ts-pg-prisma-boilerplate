@@ -9,4 +9,6 @@ const router = express.Router();
 
 router.get("/all", authenticateMiddleware, authorizeMiddleware(ROLE_NAMES.ADMIN), getUsers);
 
+router.get("/test", getUsers);
+
 export default router;
