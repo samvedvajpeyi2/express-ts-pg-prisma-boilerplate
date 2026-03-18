@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import type { Mock } from "vitest";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, type Mocked, vi } from "vitest";
 
 import type { RoleName } from "../../../../generated/prisma/client.js";
 import type { AuthRepository } from "../repositories/auth.repository.js";
@@ -9,7 +8,6 @@ import { AuthService } from "../services/auth.service.js";
 
 // Mock external utilities (pure functions/modules)
 vi.mock("../../../utils/jwt.util.js", () => ({
-    // add type for payload to get better type safety in tests
     signToken: vi.fn(
         (payload: { userId: number; role: RoleName }) => `access-token-for-${payload.userId}`,
     ),
@@ -29,11 +27,6 @@ vi.mock("../../../utils/time.util.js", () => ({
     parseDurationMs: vi.fn(() => 7 * 24 * 60 * 60 * 1000), // 7 days
 }));
 
-// vi.spyOn(bcrypt, "hash").mockImplementation((pw) => `hashed-${pw}`);
-// vi.spyOn(bcrypt, "compare").mockImplementation(
-//     (plain, hash) => plain === hash.replace("hashed-", ""),
-// );
-
 vi.mock("bcryptjs", () => {
     return {
         default: {
@@ -49,14 +42,7 @@ vi.mock("bcryptjs", () => {
 
 describe("AuthService (unit)", () => {
     let service: AuthService;
-    // let mockRepo: AuthRepository;
-    let mockRepo: {
-        findByEmail: Mock;
-        createUser: Mock;
-        createRefreshToken: Mock;
-        findRefreshToken: Mock;
-        revokeRefreshToken: Mock;
-    };
+    let mockRepo: Mocked<AuthRepository>;
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -67,7 +53,8 @@ describe("AuthService (unit)", () => {
             createRefreshToken: vi.fn(),
             findRefreshToken: vi.fn(),
             revokeRefreshToken: vi.fn(),
-        } as unknown as AuthRepository;
+            revokeAllUserRefreshTokens: vi.fn(),
+        } as unknown as Mocked<AuthRepository>;
 
         service = new AuthService(mockRepo);
     });
@@ -78,10 +65,10 @@ describe("AuthService (unit)", () => {
             mockRepo.createUser.mockResolvedValue({
                 id: 42,
                 email: "test@example.com",
-                password: "hashed-123456",
                 firstname: "Test",
                 lastname: "User",
                 role: { name: "USER" as RoleName },
+                createdAt: new Date(),
             });
 
             const result = await service.register({
@@ -98,8 +85,7 @@ describe("AuthService (unit)", () => {
             expect(result.refreshToken).toBe("refresh-raw-42");
 
             expect(mockRepo.findByEmail).toHaveBeenCalledWith("test@example.com");
-            expect(bcrypt.hash).toHaveBeenCalledWith("123456", 12);
-            // expect(vi.mocked(bcrypt.hash)).toHaveBeenCalledWith("123456", 12);
+            expect(vi.mocked(bcrypt.hash)).toHaveBeenCalledWith("123456", 12);
             expect(mockRepo.createUser).toHaveBeenCalledWith(
                 expect.objectContaining({
                     email: "test@example.com",
@@ -111,7 +97,14 @@ describe("AuthService (unit)", () => {
         });
 
         it("rejects duplicate email", async () => {
-            mockRepo.findByEmail.mockResolvedValue({ id: 1 });
+            mockRepo.findByEmail.mockResolvedValue({
+                id: 1,
+                email: "",
+                password: "",
+                firstname: null,
+                lastname: null,
+                role: { name: "USER" as RoleName },
+            });
 
             const result = await service.register({
                 email: "exists@example.com",
@@ -131,6 +124,7 @@ describe("AuthService (unit)", () => {
                 email: "test@example.com",
                 password: "hashed-123456",
                 firstname: "Test",
+                lastname: null,
                 role: { name: "USER" as RoleName },
             });
 
@@ -144,26 +138,30 @@ describe("AuthService (unit)", () => {
             expect(result.data?.password).toBeUndefined();
             expect(result.data?.accessToken).toBe("access-token-for-42");
             expect(result.refreshToken).toBe("refresh-raw-42");
-            expect(bcrypt.compare).toHaveBeenCalledWith("123456", "hashed-123456");
-            // expect(vi.mocked(bcrypt.compare)).toHaveBeenCalledWith("123456", "hashed-123456");
+            expect(vi.mocked(bcrypt.compare)).toHaveBeenCalledWith("123456", "hashed-123456");
         });
 
-        it("returns same error for wrong password OR non-existing user", async () => {
-            // non-existing
+        it("returns error for non-existing user", async () => {
             mockRepo.findByEmail.mockResolvedValue(null);
-            let result = await service.login({ email: "nope", password: "123" });
+
+            const result = await service.login({ email: "nope@example.com", password: "123" });
+
             expect(result.success).toBe(false);
             expect(result.message).toBe("Invalid credentials");
+        });
 
-            // wrong password
-
+        it("returns same error for wrong password (prevents user enumeration)", async () => {
             mockRepo.findByEmail.mockResolvedValue({
                 id: 1,
-                password: "password",
+                email: "exists@example.com",
+                password: "hashed-somepassword",
+                firstname: null,
+                lastname: null,
                 role: { name: "USER" as RoleName },
             });
 
-            result = await service.login({ email: "exists", password: "wrong-password" });
+            const result = await service.login({ email: "exists@example.com", password: "wrong" });
+
             expect(result.success).toBe(false);
             expect(result.message).toBe("Invalid credentials");
         });
@@ -175,6 +173,9 @@ describe("AuthService (unit)", () => {
             const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
 
             mockRepo.findRefreshToken.mockResolvedValue({
+                id: 1,
+                tokenHash: "irrelevant",
+                createdAt: new Date(),
                 userId: 42,
                 revokedAt: null,
                 expiresAt: new Date(Date.now() + 86400000),
@@ -184,32 +185,53 @@ describe("AuthService (unit)", () => {
 
             expect(result.success).toBe(true);
             expect(result.data?.accessToken).toBe("access-token-for-42");
-            expect(result.refreshToken).toBe("refresh-raw-42"); // new one
+            expect(result.refreshToken).toBe("refresh-raw-42"); // new rotated token
 
             expect(mockRepo.revokeRefreshToken).toHaveBeenCalledWith(tokenHash);
             expect(mockRepo.createRefreshToken).toHaveBeenCalled();
         });
 
-        it("rejects expired / revoked / invalid token", async () => {
-            // expired
+        it("rejects expired refresh token", async () => {
             mockRepo.findRefreshToken.mockResolvedValue({
+                id: 1,
+                tokenHash: "irrelevant",
+                createdAt: new Date(),
+                userId: 1,
                 revokedAt: null,
                 expiresAt: new Date(Date.now() - 1000),
             });
-            let r = await service.refresh("old");
-            expect(r.success).toBe(false);
 
-            // revoked
+            const result = await service.refresh("old-token");
 
-            mockRepo.findRefreshToken.mockResolvedValue({ revokedAt: new Date() });
-            r = await service.refresh("revoked");
-            expect(r.success).toBe(false);
+            expect(result.success).toBe(false);
+        });
 
-            // invalid signature → verify throws
+        it("rejects revoked refresh token", async () => {
+            mockRepo.findRefreshToken.mockResolvedValue({
+                id: 1,
+                tokenHash: "irrelevant",
+                createdAt: new Date(),
+                userId: 1,
+                revokedAt: new Date(),
+                expiresAt: new Date(Date.now() + 86400000),
+            });
 
-            mockRepo.findRefreshToken.mockResolvedValue({});
-            // r = await service.refresh("bad-signature");
-            // expect(r.success).toBe(false);
+            const result = await service.refresh("revoked-token");
+
+            expect(result.success).toBe(false);
+        });
+
+        it("throws for invalid JWT signature", async () => {
+            // Token is found in DB but JWT signature verification fails
+            mockRepo.findRefreshToken.mockResolvedValue({
+                id: 1,
+                tokenHash: "irrelevant",
+                createdAt: new Date(),
+                userId: 1,
+                revokedAt: null,
+                expiresAt: new Date(Date.now() + 86400000),
+            });
+
             await expect(service.refresh("bad-signature")).rejects.toThrow(/invalid/);
         });
     });

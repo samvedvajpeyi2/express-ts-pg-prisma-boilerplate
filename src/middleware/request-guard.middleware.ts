@@ -13,7 +13,7 @@ export const checkJsonContentTypeMiddleware = (
     }
 
     const contentType = req.headers["content-type"];
-    if (!contentType || !contentType.startsWith("application/json")) {
+    if (!contentType?.startsWith("application/json")) {
         res.status(400).json({
             success: false,
             message: "Only application/json Content-Type is allowed",

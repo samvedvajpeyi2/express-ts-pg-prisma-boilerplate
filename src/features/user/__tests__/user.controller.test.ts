@@ -1,6 +1,9 @@
 import type { Request, Response } from "express";
-import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { RoleName } from "../../../../generated/prisma/client.js";
+import { prisma } from "../../../config/prisma.js";
+import { getUsers } from "../controllers/user.controller.js";
 
 vi.mock("../../../config/prisma.js", () => {
     return {
@@ -18,20 +21,23 @@ describe("getUsers controller", () => {
     });
 
     it("responds with users from Prisma", async () => {
-        // Dynamically import the mocked prisma and the controller after calling vi.mock().
-        // Another reason for dynamic import is eslint `import/first` rule,
-        // which disallows importing before calling vi.mock().
-        const { prisma } = await import("../../../config/prisma.js");
-        const { getUsers } = await import("../controllers/user.controller.js");
-
         // Prepare the fake data the mocked Prisma should return.
-        const mockUsers = [{ id: "1", name: "Alice", role: { name: "user" } }];
+        const mockUsers = [
+            {
+                id: 1,
+                email: "alice@example.com",
+                password: "hashed-password",
+                firstname: "Alice",
+                lastname: null,
+                roleId: 1,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                active: true,
+                role: { name: "USER" as RoleName },
+            },
+        ];
 
-        // // Add type assertion to access the mocked method with correct typings.
-        // type UserPrisma = { user: { findMany: Mock } };
-        // const prismaTyped = prisma as unknown as UserPrisma;
-        // prismaTyped.user.findMany.mockResolvedValue(mockUsers);
-        (prisma.user.findMany as Mock).mockResolvedValue(mockUsers);
+        vi.mocked(prisma.user.findMany).mockResolvedValue(mockUsers);
 
         // Use typed Request/Response to minimize `any` usage in tests.
         const req = {} as unknown as Request;

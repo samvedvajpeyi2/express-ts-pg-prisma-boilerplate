@@ -27,3 +27,6 @@ info.txt
 src/logs/*
 
 /generated/prisma
+
+Workflow.md
+Claude.md

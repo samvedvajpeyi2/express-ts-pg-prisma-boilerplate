@@ -5,7 +5,7 @@ import type { EnvVars } from "./env-schema.js";
 import { envSchema } from "./env-schema.js";
 
 // Determine which .env file to load based on NODE_ENV
-const nodeEnv = process.env.NODE_ENV || "development";
+const nodeEnv = process.env.NODE_ENV ?? "development";
 const envFile = nodeEnv === "production" ? ".env" : ".env.dev";
 
 if (fs.existsSync(envFile)) {
@@ -17,13 +17,12 @@ if (fs.existsSync(envFile)) {
 
 // Validate env with schema
 const parsedEnv = envSchema.safeParse(process.env);
-const NODE_ENV = process.env.NODE_ENV || "development";
 
 if (!parsedEnv.success) {
     const formattedErrors = parsedEnv.error.format();
     const missingKeys = Object.keys(formattedErrors).filter((key) => key !== "_errors");
     console.error(
-        `❌ Missing environment variables in "${NODE_ENV}" .env file:\n${missingKeys.join(", ")}`,
+        `❌ Missing environment variables in "${nodeEnv}" .env file:\n${missingKeys.join(", ")}`,
     );
     process.exit(1);
 }

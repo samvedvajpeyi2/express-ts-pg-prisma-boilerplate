@@ -1,7 +1,6 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
-import prettierPlugin from "eslint-plugin-prettier";
 import nPlugin from "eslint-plugin-n";
 import promisePlugin from "eslint-plugin-promise";
 import importPlugin from "eslint-plugin-import";
@@ -46,18 +45,13 @@ export default tseslint.config(
             import: importPlugin,
             "simple-import-sort": simpleImportSort,
             security: securityPlugin,
-            prettier: prettierPlugin,
             n: nPlugin,
             promise: promisePlugin,
         },
 
         // Custom rules for this project
         rules: {
-            // Fail lint if file formatting differs from Prettier
-            "prettier/prettier": "error",
-
-            // Allow any temporarily, but show warning so it can be reduced over time
-            "@typescript-eslint/no-explicit-any": "warn",
+            "@typescript-eslint/no-explicit-any": "error",
             // Allow `_`-prefixed vars/args to mark intentionally unused values
             "@typescript-eslint/no-unused-vars": [
                 "error",
@@ -69,7 +63,6 @@ export default tseslint.config(
             "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
 
             // Promise best-practice rules
-            "promise/always-return": "error",
             "promise/no-return-wrap": "error",
             "promise/param-names": "error",
 
@@ -96,6 +89,13 @@ export default tseslint.config(
             "simple-import-sort/imports": "error",
             "simple-import-sort/exports": "error",
 
+            // Prefer ?? over || for nullish checks (avoids falsy pitfalls with 0/""/false)
+            "@typescript-eslint/prefer-nullish-coalescing": "error",
+            // Prefer ?. over && chains for optional access
+            "@typescript-eslint/prefer-optional-chain": "error",
+            // Catch redundant `as Type` casts the compiler already knows
+            "@typescript-eslint/no-unnecessary-type-assertion": "error",
+
             // This rule is often noisy for normal object access patterns; so keeping it off for now
             "security/detect-object-injection": "off",
         },
@@ -106,6 +106,15 @@ export default tseslint.config(
         files: ["src/config/env-config.ts"],
         rules: {
             "no-restricted-properties": "off",
+        },
+    },
+
+    // Test file overrides
+    {
+        files: ["**/*.test.ts"],
+        rules: {
+            // Vitest mocks (vi.fn()) are intentionally unbound — the base rule false-positives on them
+            "@typescript-eslint/unbound-method": "off",
         },
     },
 
