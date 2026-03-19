@@ -16,6 +16,7 @@
         "test:watch": "vitest --watch",
         "test:coverage": "vitest run --coverage",
         "test:integration": "NODE_ENV=test vitest --config vitest.integration.config.ts",
+        "type-check": "tsc",
         "prepare": "husky"
     },
     "keywords": [],

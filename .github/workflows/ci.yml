@@ -51,6 +51,15 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Prettier check
+        run: npm run format:check
+
       - name: Create test database
         run: psql postgres://postgres:postgres@localhost:5432/postgres -c "CREATE DATABASE pen_ts_boilerplate_test;"
 
