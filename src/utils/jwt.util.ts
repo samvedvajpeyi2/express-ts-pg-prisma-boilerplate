@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 import type { RoleName } from "../../generated/prisma/client.js";
@@ -19,7 +20,9 @@ export const verifyToken = (token: string): JwtPayload => {
 };
 
 export const signRefreshToken = (payload: JwtPayload): string => {
-    return jwt.sign(payload, env.REFRESH_TOKEN_SECRET, {
+    // jti (JWT ID) adds a random unique identifier so two tokens signed within
+    // the same second produce different hashes — preventing P2002 on createRefreshToken.
+    return jwt.sign({ ...payload, jti: crypto.randomUUID() }, env.REFRESH_TOKEN_SECRET, {
         expiresIn: env.REFRESH_TOKEN_EXPIRES_IN as jwt.SignOptions["expiresIn"],
     });
 };

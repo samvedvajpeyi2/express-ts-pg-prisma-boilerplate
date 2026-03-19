@@ -18,6 +18,7 @@ Thumbs.db
 .env
 .env.dev
 .env.db.dev
+.env.test
 
 # Ignore Node.js modules
 node_modules/
@@ -30,3 +31,4 @@ src/logs/*
 
 Workflow.md
 Claude.md
+integration-tests-plan.md

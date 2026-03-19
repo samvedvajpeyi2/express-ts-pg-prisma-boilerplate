@@ -1,0 +1,95 @@
+@baseUrl = http://localhost:3000
+
+
+### ============================================================
+### Health
+### ============================================================
+
+### Root
+GET {{baseUrl}}/
+
+
+### ============================================================
+### Auth
+### ============================================================
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "alice@example.com",
+    "password": "password123",
+    "firstname": "Alice",
+    "lastname": "Smith"
+}
+
+###
+
+### Register — duplicate email (expect 409)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "alice@example.com",
+    "password": "password123"
+}
+
+###
+
+### Register — invalid payload (expect 400)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "not-an-email",
+    "password": "short"
+}
+
+###
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "alice@example.com",
+    "password": "password123"
+}
+
+###
+
+### Login — wrong password (expect 401)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "alice@example.com",
+    "password": "wrongpassword"
+}
+
+###
+
+### Refresh — uses the refreshToken cookie set by login/register
+# The REST Client sends cookies automatically if the server set them via Set-Cookie.
+POST {{baseUrl}}/auth/refresh
+
+###
+
+### Logout
+POST {{baseUrl}}/auth/logout
+
+
+### ============================================================
+### Users
+### ============================================================
+
+### GET /users/test — no auth required
+GET {{baseUrl}}/users/test
+
+###
+
+### GET /users/all — requires auth (ADMIN role)
+# Paste a valid access token from a login/register response below.
+GET {{baseUrl}}/users/all
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzczODgyODk0LCJleHAiOjE3NzM4ODM3OTR9.EBa5qSiT1T-w3ckaRV7f8LrUhBUpahv2NpRar_SlSkg

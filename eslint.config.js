@@ -109,6 +109,15 @@ export default tseslint.config(
         },
     },
 
+    // These files load .env.test manually via dotenv before any module is imported,
+    // so process.env is the only way to read vars at that point — same exemption as env-config.ts
+    {
+        files: ["tests/integration/global-setup.ts", "vitest.integration.config.ts"],
+        rules: {
+            "no-restricted-properties": "off",
+        },
+    },
+
     // Test file overrides
     {
         files: ["**/*.test.ts"],

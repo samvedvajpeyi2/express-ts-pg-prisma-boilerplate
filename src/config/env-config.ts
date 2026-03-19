@@ -6,7 +6,7 @@ import { envSchema } from "./env-schema.js";
 
 // Determine which .env file to load based on NODE_ENV
 const nodeEnv = process.env.NODE_ENV ?? "development";
-const envFile = nodeEnv === "production" ? ".env" : ".env.dev";
+const envFile = nodeEnv === "production" ? ".env" : nodeEnv === "test" ? ".env.test" : ".env.dev";
 
 if (fs.existsSync(envFile)) {
     dotenv.config({ path: envFile });

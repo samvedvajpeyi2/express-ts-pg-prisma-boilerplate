@@ -1,4 +1,4 @@
-.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix
+.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix test-db-setup test-int
 
 start:
 	docker compose up
@@ -64,3 +64,10 @@ lint:
 
 lint-fix:
 	docker exec -it pen_ts_boilerplate_app npm run lint:fix
+
+# One-time: creates the test database. Migrations run automatically via global-setup.ts.
+test-db-setup:
+	docker exec postgres-db psql -U postgres -c "CREATE DATABASE pen_ts_boilerplate_test;" 2>/dev/null || true
+
+test-int:
+	docker exec -it pen_ts_boilerplate_app npm run test:integration

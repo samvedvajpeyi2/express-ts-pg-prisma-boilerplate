@@ -1,9 +1,8 @@
 import type { Server } from "node:http";
 
-import type { Application, NextFunction, Request, Response } from "express";
+import type { Application } from "express";
 import express from "express";
 
-// import type { Request, Response, NextFunction } from "express";
 import { env } from "./config/env-config.js";
 import { prisma } from "./config/prisma.js";
 import authRoutes from "./features/auth/routes/auth.routes.js";
@@ -18,32 +17,29 @@ import {
     rateLimiterMiddleware,
 } from "./middleware/security.middleware.js";
 
-const app: Application = express();
+export function createApp(): Application {
+    const app: Application = express();
+
+    // Skip rate limiter in test mode — it holds state that bleeds between tests
+    if (env.NODE_ENV !== "test") {
+        app.use(rateLimiterMiddleware);
+    }
+    app.use(hostWhitelistMiddleware(env.WHITE_LIST_URLS));
+    app.use(checkJsonContentTypeMiddleware);
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    app.use("/users", userRoutes);
+    app.use("/auth", authRoutes);
+
+    app.use(unmatchedRoutesMiddleware);
+    app.use(errorMiddleware);
+
+    return app;
+}
+
+const app = createApp();
 const PORT: number = env.PORT;
-
-app.use(rateLimiterMiddleware);
-app.use(hostWhitelistMiddleware(env.WHITE_LIST_URLS));
-app.use(checkJsonContentTypeMiddleware);
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Delete later, this was test
-app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log(`${req.method} http://${req.headers.host}${req.url}`);
-    next();
-});
-
-app.get("/", (req: Request, res: Response) => {
-    res.send("Hello, world! This is the server.js file, or is it?");
-});
-
-app.use("/users", userRoutes);
-app.use("/auth", authRoutes);
-
-app.use(unmatchedRoutesMiddleware);
-
-app.use(errorMiddleware);
 
 const server: Server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
