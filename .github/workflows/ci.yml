@@ -30,9 +30,9 @@ jobs:
       PORT: 3000
       LOG_LEVEL: silent
       WHITE_LIST_URLS: https://example.com
-      JWT_SECRET: my_super_secure_secret_that_is_32_chars_long
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
       JWT_EXPIRES_IN: 15m
-      REFRESH_TOKEN_SECRET: my_super_secure_refresh_secret_32chars
+      REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
       REFRESH_TOKEN_EXPIRES_IN: 30d
 
     steps:
