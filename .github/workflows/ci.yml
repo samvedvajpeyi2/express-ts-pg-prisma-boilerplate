@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Unit + Integration Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: pen_ts_boilerplate_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/pen_ts_boilerplate_db
+      PORT: 3000
+      LOG_LEVEL: silent
+      WHITE_LIST_URLS: https://example.com
+      JWT_SECRET: my_super_secure_secret_that_is_32_chars_long
+      JWT_EXPIRES_IN: 15m
+      REFRESH_TOKEN_SECRET: my_super_secure_refresh_secret_32chars
+      REFRESH_TOKEN_EXPIRES_IN: 30d
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Create test database
+        run: psql postgres://postgres:postgres@localhost:5432/postgres -c "CREATE DATABASE pen_ts_boilerplate_test;"
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/pen_ts_boilerplate_test

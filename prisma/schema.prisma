@@ -13,13 +13,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum ReviewStatus {
-  PENDING
-  IN_REVIEW
-  APPROVED
-  REJECTED
-}
-
 enum RoleName {
   USER
   ADMIN
@@ -31,7 +24,6 @@ model User {
   password   String
   firstname  String?
   lastname   String?
-  documents  Document[]
   refreshTokens RefreshToken[]
   roleId     Int        @default(1)
   role       Role       @relation(fields: [roleId], references: [id])
@@ -44,21 +36,6 @@ model Role {
   id    Int     @id @default(autoincrement())
   name  RoleName @unique
   users User[]
-}
-
-model Document {
-  id           Int          @id @default(autoincrement())
-  filename     String
-  url          String?
-  mimeType     String?
-  uploadedAt   DateTime     @default(now())
-  reviewed     Boolean      @default(false)
-  reviewStatus ReviewStatus @default(PENDING)
-  reviewNotes  String?
-  userId       Int
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model RefreshToken {

@@ -110,7 +110,7 @@ describe("Auth — POST /auth/logout", () => {
         expect(res.status).toBe(200);
         expect(body.success).toBe(true);
         // Cookie should be cleared (value set to empty string)
-        const cookie: string = (res.headers["set-cookie"] as string[])?.[0] ?? "";
+        const cookie = (res.headers["set-cookie"] as unknown as string[])?.[0] ?? "";
         expect(cookie).toMatch(/refreshToken=;/);
     });
 });

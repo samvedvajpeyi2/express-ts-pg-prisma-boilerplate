@@ -1,4 +1,4 @@
-.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix test-db-setup test-int
+.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix test-db-setup test-int test-all test-ci
 
 start:
 	docker compose up
@@ -71,3 +71,10 @@ test-db-setup:
 
 test-int:
 	docker exec -it pen_ts_boilerplate_app npm run test:integration
+
+test-all:
+	docker exec -it pen_ts_boilerplate_app npm run test && docker exec -it pen_ts_boilerplate_app npm run test:integration
+
+# CI-safe version: no -it flag (no TTY in headless environments)
+test-ci:
+	docker exec pen_ts_boilerplate_app npm run test && docker exec pen_ts_boilerplate_app npm run test:integration

@@ -16,9 +16,7 @@ export default defineConfig({
         watch: false,
         // Sequential execution — concurrent test files mutating the same DB causes conflicts
         pool: "forks",
-        poolOptions: {
-            forks: { singleFork: true },
-        },
+        fileParallelism: false,
         env: {
             NODE_ENV: "test",
             // Explicitly forward DATABASE_URL so all worker processes connect to the test DB,
