@@ -22,4 +22,4 @@ router.get(
 );
 router.get("/test", userController.getUsers);
 
-export default router;
+export const userRouter = router;

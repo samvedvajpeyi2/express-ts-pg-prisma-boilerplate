@@ -25,7 +25,6 @@ A production-ready backend boilerplate built with Node.js, Express, TypeScript, 
 ✅ **Unique JWT IDs (jti)** — `crypto.randomUUID()` added to every refresh token to prevent hash collisions\
 ✅ **HttpOnly refresh token cookie** — never exposed to JavaScript\
 ✅ **Role-based access control** — `USER` / `ADMIN` roles enforced via middleware\
-✅ **Helmet** — security headers\
 ✅ **Rate limiting** — `express-rate-limit` (skipped in test mode)\
 ✅ **Host whitelisting** — blocks requests from non-whitelisted origins\
 ✅ **Content-Type guard** — all POST/PUT/PATCH requests must send `application/json`
@@ -345,7 +344,6 @@ Pre-commit hook runs ESLint + Prettier on all staged `.ts` files. Bad commits ar
 
 | Measure | Implementation |
 |---------|---------------|
-| Security headers | `helmet` middleware |
 | Rate limiting | `express-rate-limit` (skipped in test env) |
 | Host whitelisting | Custom middleware checks `req.hostname` against `WHITE_LIST_URLS` |
 | Content-Type guard | All POST/PUT/PATCH require `application/json` |
@@ -361,6 +359,7 @@ Pre-commit hook runs ESLint + Prettier on all staged `.ts` files. Bad commits ar
 ## 🔮 Upcoming Improvements
 
 - [x] **GitHub Actions CI** — unit + integration tests run automatically on every pull request
+- [ ] **Helmet** — add `helmet` middleware for standard security headers (HSTS, X-Frame-Options, etc.)
 - [ ] **`catchAsync` wrapper** — eliminate try/catch in controllers; async errors forwarded to global error handler automatically
 - [ ] **HTTP status code constants** — replace magic numbers with named constants (`HTTP_STATUS.CREATED`, etc.)
 - [ ] **Consistent response envelope** — standardise all responses to `{ success, data?, error?: { message, code } }`

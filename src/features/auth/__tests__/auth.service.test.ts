@@ -53,7 +53,6 @@ describe("AuthService (unit)", () => {
             createRefreshToken: vi.fn(),
             findRefreshToken: vi.fn(),
             revokeRefreshToken: vi.fn(),
-            revokeAllUserRefreshTokens: vi.fn(),
         } as unknown as Mocked<AuthRepository>;
 
         service = new AuthService(mockRepo);

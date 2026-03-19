@@ -5,8 +5,8 @@ import express from "express";
 
 import { env } from "./config/env-config.js";
 import { prisma } from "./config/prisma.js";
-import authRoutes from "./features/auth/routes/auth.routes.js";
-import userRoutes from "./features/user/routes/user.routes.js";
+import { authRouter } from "./features/auth/routes/auth.routes.js";
+import { userRouter } from "./features/user/routes/user.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import {
     checkJsonContentTypeMiddleware,
@@ -29,8 +29,8 @@ export function createApp(): Application {
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
 
-    app.use("/users", userRoutes);
-    app.use("/auth", authRoutes);
+    app.use("/users", userRouter);
+    app.use("/auth", authRouter);
 
     app.use(unmatchedRoutesMiddleware);
     app.use(errorMiddleware);

@@ -69,11 +69,4 @@ export class AuthRepository {
             data: { revokedAt: new Date() },
         });
     }
-
-    async revokeAllUserRefreshTokens(userId: number) {
-        return this.prisma.refreshToken.updateMany({
-            where: { userId, revokedAt: null },
-            data: { revokedAt: new Date() },
-        });
-    }
 }

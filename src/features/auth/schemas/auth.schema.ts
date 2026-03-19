@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const invalidEmailMessage = "Invalid email address my custom msggggg.";
+const invalidEmailMessage = "Invalid email address.";
 const passwordMinLengthMessage = "Password must be at least 8 characters long.";
 const passwordMaxLengthMessage = "Password must be at most 72 characters long.";
 
