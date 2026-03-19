@@ -1,19 +1,12 @@
 import type { Request, Response } from "express";
 
-import { prisma } from "../../../config/prisma.js";
+import type { UserService } from "../services/user.service.js";
 
-const getUsers = async (req: Request, res: Response) => {
-    const users = await prisma.user.findMany({
-        include: {
-            role: {
-                select: {
-                    name: true,
-                },
-            },
-        },
-    });
+export class UserController {
+    constructor(private readonly userService: UserService) {}
 
-    res.json(users);
-};
-
-export { getUsers };
+    getUsers = async (_req: Request, res: Response) => {
+        const users = await this.userService.getUsers();
+        res.json(users);
+    };
+}

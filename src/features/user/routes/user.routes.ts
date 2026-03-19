@@ -1,14 +1,25 @@
-import express from "express";
+import { Router } from "express";
 
+import { prisma } from "../../../config/prisma.js";
 import { ROLE_NAMES } from "../../../constants/roles.js";
 import { authenticateMiddleware } from "../../../middleware/authenticate.middleware.js";
 import { authorizeMiddleware } from "../../../middleware/authorize.middleware.js";
-import { getUsers } from "../controllers/user.controller.js";
+import { UserController } from "../controllers/user.controller.js";
+import { UserRepository } from "../repositories/user.repository.js";
+import { UserService } from "../services/user.service.js";
 
-const router = express.Router();
+const userRepository = new UserRepository(prisma);
+const userService = new UserService(userRepository);
+const userController = new UserController(userService);
 
-router.get("/all", authenticateMiddleware, authorizeMiddleware(ROLE_NAMES.ADMIN), getUsers);
+const router = Router();
 
-router.get("/test", getUsers);
+router.get(
+    "/all",
+    authenticateMiddleware,
+    authorizeMiddleware(ROLE_NAMES.ADMIN),
+    userController.getUsers,
+);
+router.get("/test", userController.getUsers);
 
 export default router;
