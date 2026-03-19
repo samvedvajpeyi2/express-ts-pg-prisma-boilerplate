@@ -1,4 +1,15 @@
-.PHONY: start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix test-db-setup test-int test-all test-ci
+.PHONY: setup start stop remove build restart sh logs reset pri-mig pri-gen pri-studio pri-reset seed pri-seed u d b prune test lint lint-fix test-db-setup test-int test-all test-ci
+
+setup:
+	@[ -f .env.dev ] || cp .env.example .env.dev
+	@[ -f .env.db.dev ] || cp .env.db.example .env.db.dev
+	docker compose up --build -d
+	@echo "Waiting for Postgres to be ready..."
+	@until docker exec postgres-db pg_isready -U postgres 2>/dev/null; do sleep 2; done
+	docker exec pen_ts_boilerplate_app npx prisma migrate deploy
+	docker exec pen_ts_boilerplate_app npm run seed
+	docker exec postgres-db psql -U postgres -c "CREATE DATABASE pen_ts_boilerplate_test;" 2>/dev/null || true
+	@echo "Setup complete. API running at http://localhost:3000"
 
 start:
 	docker compose up

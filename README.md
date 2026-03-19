@@ -7,6 +7,7 @@ A production-ready backend boilerplate built with Node.js, Express, TypeScript, 
 ## ✨ Features
 
 ### 🛠️ Core
+
 ✅ **TypeScript** — strict mode, full type safety throughout\
 ✅ **Express 5** — latest version with improved async error propagation\
 ✅ **Prisma ORM** — type-safe DB queries with auto-generated client\
@@ -14,12 +15,14 @@ A production-ready backend boilerplate built with Node.js, Express, TypeScript, 
 ✅ **ESM modules** — native ES module support (`"type": "module"`)
 
 ### 🏗️ Architecture
+
 ✅ **Four-layer architecture** — Routes → Controllers → Services → Repositories\
 ✅ **Feature-based folder structure** — each domain (auth, user) is fully self-contained\
 ✅ **App factory pattern** — `createApp()` separates app setup from server startup, enabling supertest without a real port\
 ✅ **Dependency injection** — services and repositories are constructor-injected, not globally imported
 
 ### 🔐 Authentication & Security
+
 ✅ **JWT access tokens** — short-lived (15m), signed with HS256\
 ✅ **Refresh token rotation** — long-lived tokens (30d) stored as SHA-256 hashes in the DB; rotated on every refresh\
 ✅ **Unique JWT IDs (jti)** — `crypto.randomUUID()` added to every refresh token to prevent hash collisions\
@@ -30,11 +33,13 @@ A production-ready backend boilerplate built with Node.js, Express, TypeScript, 
 ✅ **Content-Type guard** — all POST/PUT/PATCH requests must send `application/json`
 
 ### ✅ Validation & Error Handling
+
 ✅ **Zod** — request body validation + environment variable validation at startup\
 ✅ **Centralised error handler** — maps `AppError`, Prisma errors (P2002 → 409, P2025 → 404), and Zod errors to clean HTTP responses\
 ✅ **No stack traces in responses** — only user-friendly messages
 
 ### 🧪 Testing
+
 ✅ **Vitest** — unit tests co-located in `__tests__/` inside each feature folder\
 ✅ **Supertest** — integration tests against a real Express app (no live port)\
 ✅ **Isolated test database** — separate PostgreSQL DB (`_test` suffix), migrated automatically before each run\
@@ -42,6 +47,7 @@ A production-ready backend boilerplate built with Node.js, Express, TypeScript, 
 ✅ **Sequential integration test execution** — `singleFork: true` prevents concurrent DB corruption
 
 ### 🛠️ Developer Experience
+
 ✅ **Docker Compose** — app + Postgres containers, full environment parity\
 ✅ **Makefile** — short commands for all common tasks (`make start`, `make test`, `make lint`, etc.)\
 ✅ **Husky + lint-staged** — pre-commit hook runs ESLint + Prettier on staged files\
@@ -95,12 +101,12 @@ src/
 
 ### Layer responsibilities
 
-| Layer | File pattern | Rule |
-|-------|-------------|------|
-| **Routes** | `*.routes.ts` | Wire URLs to controllers + middleware. No logic. |
-| **Controllers** | `*.controller.ts` | Extract `req` data, call service, send `res`. Never touch Prisma. |
-| **Services** | `*.service.ts` | All business logic. No Express types, no Prisma. |
-| **Repositories** | `*.repository.ts` | All Prisma queries. Called only by services. |
+| Layer            | File pattern      | Rule                                                              |
+| ---------------- | ----------------- | ----------------------------------------------------------------- |
+| **Routes**       | `*.routes.ts`     | Wire URLs to controllers + middleware. No logic.                  |
+| **Controllers**  | `*.controller.ts` | Extract `req` data, call service, send `res`. Never touch Prisma. |
+| **Services**     | `*.service.ts`    | All business logic. No Express types, no Prisma.                  |
+| **Repositories** | `*.repository.ts` | All Prisma queries. Called only by services.                      |
 
 ### Why this separation matters
 
@@ -137,6 +143,7 @@ POST /auth/logout
 ```
 
 **Refresh token security details:**
+
 - Stored as a SHA-256 hash — raw token never persisted
 - `jti` claim (`crypto.randomUUID()`) ensures uniqueness even when signed within the same second
 - Rotation on every refresh — old token revoked, new token issued
@@ -146,12 +153,12 @@ POST /auth/logout
 
 ## 🗄️ Database Schema
 
-| Model | Key fields |
-|-------|-----------|
-| `User` | `id`, `email` (unique), `password` (bcrypt), `firstname`, `lastname`, `roleId`, `active` |
-| `Role` | `id`, `name` (`USER` \| `ADMIN`) |
-| `RefreshToken` | `id`, `tokenHash` (unique), `userId`, `expiresAt`, `revokedAt` |
-| `Document` | `id`, `filename`, `url`, `reviewStatus`, `userId` |
+| Model          | Key fields                                                                               |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| `User`         | `id`, `email` (unique), `password` (bcrypt), `firstname`, `lastname`, `roleId`, `active` |
+| `Role`         | `id`, `name` (`USER` \| `ADMIN`)                                                         |
+| `RefreshToken` | `id`, `tokenHash` (unique), `userId`, `expiresAt`, `revokedAt`                           |
+| `Document`     | `id`, `filename`, `url`, `reviewStatus`, `userId`                                        |
 
 Roles are seeded once via `prisma/seed.ts`. Foreign key cascade: deleting a user deletes their refresh tokens and documents.
 
@@ -165,6 +172,22 @@ Roles are seeded once via `prisma/seed.ts`. Foreign key cascade: deleting a user
 
 That's it — Node.js and PostgreSQL run inside containers.
 
+### ⚡ Single Command Setup
+
+Clone the repo, then run this single command from inside the repo folder:
+
+```bash
+make setup
+```
+
+This handles everything: copies env files from examples, builds the Docker image, starts containers, waits for Postgres, runs all migrations, seeds roles, and creates the test database. The API will be available at `http://localhost:3000`.
+
+> Before deploying to production, update the secrets in `.env.dev` with real values.
+
+---
+
+### Manual Setup
+
 ### 1. Clone and configure
 
 ```bash
@@ -175,8 +198,8 @@ cd express-ts-pg-prisma-boilterplate
 Copy the environment files:
 
 ```bash
-cp .env.dev.example .env.dev
-cp .env.db.dev.example .env.db.dev
+cp .env.example .env.dev
+cp .env.db.example .env.db.dev
 ```
 
 ### 2. Start the containers
@@ -201,25 +224,25 @@ make seed                 # seed roles (USER, ADMIN)
 
 ### `.env.dev` (app)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment | `development` |
-| `DATABASE_URL` | Postgres connection string | `postgres://user:pass@db:5432/mydb` |
-| `PORT` | Server port | `3000` |
-| `LOG_LEVEL` | Log verbosity | `info` |
-| `WHITE_LIST_URLS` | Comma-separated allowed origins | `https://myapp.com` |
-| `JWT_SECRET` | Access token signing secret (min 32 chars) | `...` |
-| `JWT_EXPIRES_IN` | Access token TTL | `15m` |
-| `REFRESH_TOKEN_SECRET` | Refresh token signing secret | `...` |
-| `REFRESH_TOKEN_EXPIRES_IN` | Refresh token TTL | `30d` |
+| Variable                   | Description                                | Example                             |
+| -------------------------- | ------------------------------------------ | ----------------------------------- |
+| `NODE_ENV`                 | Environment                                | `development`                       |
+| `DATABASE_URL`             | Postgres connection string                 | `postgres://user:pass@db:5432/mydb` |
+| `PORT`                     | Server port                                | `3000`                              |
+| `LOG_LEVEL`                | Log verbosity                              | `info`                              |
+| `WHITE_LIST_URLS`          | Comma-separated allowed origins            | `https://myapp.com`                 |
+| `JWT_SECRET`               | Access token signing secret (min 32 chars) | `...`                               |
+| `JWT_EXPIRES_IN`           | Access token TTL                           | `15m`                               |
+| `REFRESH_TOKEN_SECRET`     | Refresh token signing secret               | `...`                               |
+| `REFRESH_TOKEN_EXPIRES_IN` | Refresh token TTL                          | `30d`                               |
 
 ### `.env.db.dev` (postgres container)
 
-| Variable | Description |
-|----------|-------------|
-| `POSTGRES_USER` | DB username |
+| Variable            | Description |
+| ------------------- | ----------- |
+| `POSTGRES_USER`     | DB username |
 | `POSTGRES_PASSWORD` | DB password |
-| `POSTGRES_DB` | DB name |
+| `POSTGRES_DB`       | DB name     |
 
 > All environment variables are validated at startup with Zod (`src/config/env-schema.ts`). The app exits immediately with a clear error message if any required variable is missing or invalid. Never access `process.env` directly — always import `env` from `src/config/env-config.ts`.
 
@@ -227,41 +250,47 @@ make seed                 # seed roles (USER, ADMIN)
 
 ## 🛠️ Make Commands
 
+### Setup
+
+| Command      | Description                                                                                                          |
+| ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `make setup` | Full first-time setup: copies env files, builds image, starts containers, runs migrations, seeds DB, creates test DB |
+
 ### Docker
 
-| Command | Description |
-|---------|-------------|
-| `make start` | Start all containers |
-| `make stop` | Stop containers (keep volumes) |
-| `make build` | Build and start in detached mode |
-| `make restart` | Stop and start |
-| `make reset` | Wipe volumes, rebuild, start fresh |
-| `make remove` | Stop and remove volumes |
-| `make logs` | Follow container logs |
-| `make sh` | Shell into app container |
-| `make prune` | Clean unused Docker resources |
+| Command        | Description                        |
+| -------------- | ---------------------------------- |
+| `make start`   | Start all containers               |
+| `make stop`    | Stop containers (keep volumes)     |
+| `make build`   | Build and start in detached mode   |
+| `make restart` | Stop and start                     |
+| `make reset`   | Wipe volumes, rebuild, start fresh |
+| `make remove`  | Stop and remove volumes            |
+| `make logs`    | Follow container logs              |
+| `make sh`      | Shell into app container           |
+| `make prune`   | Clean unused Docker resources      |
 
 ### Prisma
 
-| Command | Description |
-|---------|-------------|
-| `make pri-mig name=<name>` | Create and apply a new migration |
-| `make pri-gen` | Regenerate Prisma client |
-| `make pri-studio` | Open Prisma Studio at port 5555 |
-| `make pri-reset` | Reset DB and re-run all migrations |
-| `make seed` | Run `prisma/seed.ts` |
+| Command                    | Description                        |
+| -------------------------- | ---------------------------------- |
+| `make pri-mig name=<name>` | Create and apply a new migration   |
+| `make pri-gen`             | Regenerate Prisma client           |
+| `make pri-studio`          | Open Prisma Studio at port 5555    |
+| `make pri-reset`           | Reset DB and re-run all migrations |
+| `make seed`                | Run `prisma/seed.ts`               |
 
 ### Code Quality
 
-| Command | Description |
-|---------|-------------|
-| `make test` | Run unit tests |
-| `make test-int` | Run integration tests |
-| `make test-all` | Run unit tests then integration tests (stops on first failure) |
-| `make test-ci` | Same as `test-all` but without `-it` flag — safe for headless CI environments |
-| `make test-db-setup` | Create test DB (one-time) |
-| `make lint` | Run ESLint |
-| `make lint-fix` | Run ESLint with auto-fix |
+| Command              | Description                                                                   |
+| -------------------- | ----------------------------------------------------------------------------- |
+| `make test`          | Run unit tests                                                                |
+| `make test-int`      | Run integration tests                                                         |
+| `make test-all`      | Run unit tests then integration tests (stops on first failure)                |
+| `make test-ci`       | Same as `test-all` but without `-it` flag — safe for headless CI environments |
+| `make test-db-setup` | Create test DB (one-time)                                                     |
+| `make lint`          | Run ESLint                                                                    |
+| `make lint-fix`      | Run ESLint with auto-fix                                                      |
 
 ---
 
@@ -296,12 +325,12 @@ make test-int        # runs all integration tests
 
 ### Test File Locations
 
-| Type | Location |
-|------|----------|
-| Unit | `src/features/{domain}/__tests__/` |
-| Integration | `tests/integration/` |
-| Functional (planned) | `tests/functional/` |
-| E2E (planned) | `tests/e2e/` |
+| Type                 | Location                           |
+| -------------------- | ---------------------------------- |
+| Unit                 | `src/features/{domain}/__tests__/` |
+| Integration          | `tests/integration/`               |
+| Functional (planned) | `tests/functional/`                |
+| E2E (planned)        | `tests/e2e/`                       |
 
 ---
 
@@ -325,7 +354,9 @@ A GitHub Actions workflow (`.github/workflows/ci.yml`) runs automatically on eve
 ## 📐 Code Quality
 
 ### ESLint
+
 Strict TypeScript rules via `typescript-eslint/recommendedTypeChecked`, plus:
+
 - `eslint-plugin-import` + `simple-import-sort` — sorted, clean imports
 - `eslint-plugin-security` — catches unsafe patterns
 - `eslint-plugin-promise` — promise best practices
@@ -333,26 +364,28 @@ Strict TypeScript rules via `typescript-eslint/recommendedTypeChecked`, plus:
 - `no-restricted-properties` on `process.env` — forces all env access through `src/config/env-config.ts`
 
 ### Prettier
+
 Auto-formatting on save (VSCode) and enforced on commit via lint-staged.
 
 ### Husky + lint-staged
+
 Pre-commit hook runs ESLint + Prettier on all staged `.ts` files. Bad commits are blocked automatically.
 
 ---
 
 ## 🔒 Security
 
-| Measure | Implementation |
-|---------|---------------|
-| Rate limiting | `express-rate-limit` (skipped in test env) |
-| Host whitelisting | Custom middleware checks `req.hostname` against `WHITE_LIST_URLS` |
-| Content-Type guard | All POST/PUT/PATCH require `application/json` |
-| Password hashing | `bcryptjs` with 12 salt rounds |
-| Refresh token storage | SHA-256 hash only — raw token never stored |
-| Token rotation | Old refresh token revoked on every use |
-| HttpOnly cookie | Refresh token unreachable from JavaScript |
-| No stack traces | Error handler returns only user-safe messages |
-| Env validation | Zod schema at startup — missing vars crash early with a clear message |
+| Measure               | Implementation                                                        |
+| --------------------- | --------------------------------------------------------------------- |
+| Rate limiting         | `express-rate-limit` (skipped in test env)                            |
+| Host whitelisting     | Custom middleware checks `req.hostname` against `WHITE_LIST_URLS`     |
+| Content-Type guard    | All POST/PUT/PATCH require `application/json`                         |
+| Password hashing      | `bcryptjs` with 12 salt rounds                                        |
+| Refresh token storage | SHA-256 hash only — raw token never stored                            |
+| Token rotation        | Old refresh token revoked on every use                                |
+| HttpOnly cookie       | Refresh token unreachable from JavaScript                             |
+| No stack traces       | Error handler returns only user-safe messages                         |
+| Env validation        | Zod schema at startup — missing vars crash early with a clear message |
 
 ---
 
@@ -372,22 +405,22 @@ Pre-commit hook runs ESLint + Prettier on all staged `.ts` files. Bad commits ar
 
 ## 📦 Tech Stack
 
-| Category | Technology |
-|----------|-----------|
-| Runtime | Node.js 24+ |
-| Language | TypeScript 5.9+ (strict mode) |
-| Framework | Express 5 |
-| ORM | Prisma 7 |
-| Database | PostgreSQL 16 |
-| Validation | Zod 4 |
-| Authentication | JWT (`jsonwebtoken`) |
-| Password hashing | bcryptjs |
-| Testing | Vitest 4 + Supertest |
-| Linting | ESLint 9 + typescript-eslint |
-| Formatting | Prettier |
-| Git hooks | Husky + lint-staged |
-| Containerisation | Docker + Docker Compose |
-| Package manager | npm |
+| Category         | Technology                    |
+| ---------------- | ----------------------------- |
+| Runtime          | Node.js 24+                   |
+| Language         | TypeScript 5.9+ (strict mode) |
+| Framework        | Express 5                     |
+| ORM              | Prisma 7                      |
+| Database         | PostgreSQL 16                 |
+| Validation       | Zod 4                         |
+| Authentication   | JWT (`jsonwebtoken`)          |
+| Password hashing | bcryptjs                      |
+| Testing          | Vitest 4 + Supertest          |
+| Linting          | ESLint 9 + typescript-eslint  |
+| Formatting       | Prettier                      |
+| Git hooks        | Husky + lint-staged           |
+| Containerisation | Docker + Docker Compose       |
+| Package manager  | npm                           |
 
 ---
 

@@ -1,0 +1,24 @@
+# Dependencies — installed fresh inside the image via RUN npm install
+node_modules
+
+# Generated files — regenerated inside the container via prisma generate
+generated/
+
+# Build output
+dist/
+
+# Git history
+.git
+
+# Local env files — never bake secrets into the image
+.env
+.env.dev
+.env.db.dev
+.env.test
+
+# Dev tooling config — not needed at runtime
+.vscode/
+.husky/
+
+# Docs
+*.md
